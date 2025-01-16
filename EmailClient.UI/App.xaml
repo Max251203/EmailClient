@@ -1,0 +1,11 @@
+﻿<Application x:Class="EmailClient.UI.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:EmailClient.UI.Converters"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:LoadingTextConverter x:Key="LoadingTextConverter"/>
+        <converters:ProviderToDisplayNameConverter x:Key="ProviderToDisplayNameConverter"/>
+    </Application.Resources>
+</Application>

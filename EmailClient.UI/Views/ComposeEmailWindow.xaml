@@ -1,0 +1,123 @@
+﻿<Window x:Class="EmailClient.UI.Views.ComposeEmailWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Compose Email" 
+        Height="600" 
+        Width="800"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header Fields -->
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="From:" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5" VerticalAlignment="Center"/>
+            <TextBox Text="{Binding From}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5" IsReadOnly="True"/>
+
+            <TextBlock Text="To:" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5" VerticalAlignment="Center"/>
+            <TextBox Text="{Binding To, UpdateSourceTrigger=PropertyChanged}" 
+                     Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"/>
+
+            <TextBlock Text="Subject:" Grid.Row="2" Grid.Column="0" Margin="0,0,10,5" VerticalAlignment="Center"/>
+            <TextBox Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged}" 
+                     Grid.Row="2" Grid.Column="1"/>
+        </Grid>
+
+        <!-- Toolbar -->
+        <ToolBar Grid.Row="1" Margin="0,0,0,5">
+            <Button Command="{Binding AttachFileCommand}" Margin="2">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="📎" FontSize="16" Margin="0,0,5,0"/>
+                    <TextBlock Text="Attach File"/>
+                </StackPanel>
+            </Button>
+        </ToolBar>
+
+        <!-- Attachments List -->
+        <ItemsControl Grid.Row="2" 
+                      ItemsSource="{Binding Attachments}" 
+                      Margin="0,0,0,5"
+                      Visibility="{Binding HasAttachments, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="0,2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding FileName}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Size}" Grid.Column="1" Margin="10,0" VerticalAlignment="Center"/>
+                        <Button Grid.Column="2" 
+                                Command="{Binding DataContext.RemoveAttachmentCommand, 
+                                          RelativeSource={RelativeSource AncestorType=Window}}"
+                                CommandParameter="{Binding}"
+                                Content="❌"
+                                Padding="5,0"
+                                Background="Transparent"
+                                BorderThickness="0"/>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Message Body -->
+        <TextBox Grid.Row="3" 
+                 Text="{Binding Body, UpdateSourceTrigger=PropertyChanged}"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 VerticalScrollBarVisibility="Auto"
+                 Margin="0,0,0,10"/>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="4" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right">
+            <Button Content="Send" 
+                    Command="{Binding SendCommand}"
+                    Width="100"
+                    Height="30"
+                    Margin="0,0,10,0"
+                    Background="#0078D4"
+                    Foreground="White"
+                    IsDefault="True"/>
+            <Button Content="Cancel" 
+                    Width="100"
+                    Height="30"
+                    IsCancel="True"/>
+        </StackPanel>
+
+        <!-- Loading Overlay -->
+        <Grid Grid.Row="0" 
+              Grid.RowSpan="5" 
+              Background="#80000000" 
+              Visibility="{Binding IsLoading, 
+                          Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" 
+                       VerticalAlignment="Center">
+                <ProgressBar Width="100" 
+                           Height="2" 
+                           IsIndeterminate="True"/>
+                <TextBlock Text="Sending..." 
+                         Foreground="White" 
+                         HorizontalAlignment="Center" 
+                         Margin="0,10,0,0"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
