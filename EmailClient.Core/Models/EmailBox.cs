@@ -8,6 +8,7 @@
         public string DisplayName { get; set; }
         public Dictionary<string, List<Email>> CachedEmails { get; set; } = new();
         public DateTime LastSyncTime { get; set; }
+        public bool IsInitialized { get; set; }  // Добавляем это свойство
 
         public EmailBox(EmailAccount account)
         {
@@ -23,6 +24,7 @@
                 : account.DisplayName;
 
             LastSyncTime = DateTime.Now;
+            IsInitialized = false;  // Инициализируем флаг
         }
 
         public void ClearCache()

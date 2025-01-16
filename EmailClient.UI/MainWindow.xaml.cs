@@ -25,7 +25,10 @@ namespace EmailClient.UI
             {
                 if (_viewModel.EmailBoxes.Count > 0)
                 {
-                    // Инициализируем первый сохраненный аккаунт
+                    _viewModel.IsLoading = true;  // Показываем индикатор загрузки
+                    _viewModel.StatusMessage = "Initializing email client...";
+
+                    // Инициализируем только первый аккаунт
                     var firstAccount = _viewModel.EmailBoxes.First().Account;
                     await _viewModel.InitializeWithAccount(firstAccount);
                 }
@@ -36,6 +39,10 @@ namespace EmailClient.UI
                               "Error",
                               MessageBoxButton.OK,
                               MessageBoxImage.Error);
+            }
+            finally
+            {
+                _viewModel.IsLoading = false;
             }
         }
 

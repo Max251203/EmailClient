@@ -127,7 +127,17 @@ namespace EmailClient.UI.ViewModels
                 {
                     _selectedEmailBox = value;
                     OnPropertyChanged();
-                    LoadEmailBoxContent();
+
+                    // Инициализируем ящик при его выборе только если он ещё не инициализирован
+                    if (value != null && !value.IsInitialized)
+                    {
+                        InitializeWithAccount(value.Account).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        LoadEmailBoxContent();
+                    }
+
                     (RemoveEmailBoxCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
@@ -319,6 +329,11 @@ namespace EmailClient.UI.ViewModels
                 if (existingBox != null)
                 {
                     emailBox = existingBox;
+                    if (emailBox.IsInitialized) // Если уже инициализирован, просто загружаем контент
+                    {
+                        LoadEmailBoxContent();
+                        return;
+                    }
                 }
                 else
                 {
@@ -329,6 +344,7 @@ namespace EmailClient.UI.ViewModels
 
                 SelectedEmailBox = emailBox;
                 await InitializeEmailBox(emailBox);
+                emailBox.IsInitialized = true; // Помечаем как инициализированный
                 IsConnected = true;
             }
             catch (Exception ex)
