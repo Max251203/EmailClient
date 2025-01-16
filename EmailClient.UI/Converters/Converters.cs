@@ -24,10 +24,9 @@ namespace EmailClient.UI.Converters
             if (value is EmailProvider provider)
             {
                 return provider switch
-                {
-                    EmailProvider.Gmail => "Gmail",
-                    EmailProvider.GstuMail => "GSTU Mail",
+                {   
                     EmailProvider.MailRu => "Mail.ru",
+                    EmailProvider.GstuMail => "GSTU Mail",
                     EmailProvider.Custom => "Custom Server",
                     _ => string.Empty
                 };

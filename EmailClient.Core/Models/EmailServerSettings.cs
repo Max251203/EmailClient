@@ -10,7 +10,6 @@ public enum EmailProvider
 {
     Custom,
     GstuMail,
-    Gmail,
     MailRu
 }
 
@@ -57,19 +56,6 @@ public static class EmailProviderSettings
                 RequiresExplicitSsl = true,  // Оставляем STARTTLS
                 DisplayName = "GSTU Mail",
                 Protocol = EmailProtocol.IMAP
-            },
-            EmailProvider.Gmail => new EmailServerSettings
-            {
-                PopServer = "pop.gmail.com",
-                PopPort = 995,
-                ImapServer = "imap.gmail.com",
-                ImapPort = 993,
-                SmtpServer = "smtp.gmail.com",
-                SmtpPort = 465,
-                RequiresSsl = true,
-                RequiresExplicitSsl = false,
-                DisplayName = "Gmail",
-                Protocol = EmailProtocol.POP3
             },
             _ => new EmailServerSettings
             {

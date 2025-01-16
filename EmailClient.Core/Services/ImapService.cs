@@ -2,6 +2,7 @@
 using EmailClient.Core.Models;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -95,7 +96,7 @@ namespace EmailClient.Core.Services
                                     Icon = "📥"
                                 });
                             }
-                            else if (name.Equals("INBOX/ToMyself", StringComparison.OrdinalIgnoreCase))
+                            else if ( name.Equals("INBOX/ToMyself", StringComparison.OrdinalIgnoreCase))
                             {
                                 folders.Add(new EmailFolder
                                 {

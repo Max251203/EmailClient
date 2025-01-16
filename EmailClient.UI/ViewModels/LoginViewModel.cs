@@ -26,16 +26,15 @@ namespace EmailClient.UI.ViewModels
             LoginCommand = new RelayCommand(async _ => await LoginAsync(), _ => CanLogin());
             OpenGmailSettingsCommand = new RelayCommand(_ => OpenGmailSettings());
 
-            _selectedProvider = EmailProvider.GstuMail;
+            _selectedProvider = EmailProvider.MailRu;
             UpdateCurrentSettings();
         }
 
         public ObservableCollection<EmailProvider> AvailableProviders =>
             new ObservableCollection<EmailProvider>
             {
-                EmailProvider.GstuMail,
-                EmailProvider.Gmail,
                 EmailProvider.MailRu,
+                EmailProvider.GstuMail,
                 EmailProvider.Custom
             };
 
@@ -50,7 +49,7 @@ namespace EmailClient.UI.ViewModels
                     UpdateCurrentSettings();
                     OnPropertyChanged();
                     OnPropertyChanged(nameof(IsCustomServer));
-                    OnPropertyChanged(nameof(IsGmail));
+                    OnPropertyChanged(nameof(IsMailRu));
                     OnPropertyChanged(nameof(ProviderInstructions));
                     ErrorMessage = string.Empty;
                     (LoginCommand as RelayCommand)?.RaiseCanExecuteChanged();
@@ -114,7 +113,7 @@ namespace EmailClient.UI.ViewModels
 
         public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
         public bool IsCustomServer => SelectedProvider == EmailProvider.Custom;
-        public bool IsGmail => SelectedProvider == EmailProvider.Gmail;
+        public bool IsMailRu => SelectedProvider == EmailProvider.MailRu;
 
         public string ProviderInstructions
         {
@@ -122,8 +121,8 @@ namespace EmailClient.UI.ViewModels
             {
                 return SelectedProvider switch
                 {
-                    EmailProvider.Gmail => "For Gmail, you need to use an App Password. Enable 2-Step Verification and create an App Password in your Google Account settings.",
-                    EmailProvider.Custom => "Enter your email server settings manually.",
+                    EmailProvider.MailRu => "Для подключения необходимо ввести пароль приложения, а не аккаунта!",
+                    EmailProvider.Custom => "Настройте подключение вручную.",
                     _ => string.Empty
                 };
             }
@@ -230,7 +229,7 @@ namespace EmailClient.UI.ViewModels
                 EmailAccount = null;
                 ErrorMessage = GetFriendlyErrorMessage(ex);
 
-                if (IsGmail && ErrorMessage.Contains("authentication failed"))
+                if (IsMailRu && ErrorMessage.Contains("authentication failed"))
                 {
                     ErrorMessage += "\n\nFor Gmail, make sure you're using an App Password, not your regular password.";
                 }
