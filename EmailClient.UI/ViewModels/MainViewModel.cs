@@ -329,11 +329,6 @@ namespace EmailClient.UI.ViewModels
                 if (existingBox != null)
                 {
                     emailBox = existingBox;
-                    if (emailBox.IsInitialized) // Если уже инициализирован, просто загружаем контент
-                    {
-                        LoadEmailBoxContent();
-                        return;
-                    }
                 }
                 else
                 {
@@ -342,9 +337,12 @@ namespace EmailClient.UI.ViewModels
                     _settingsService.SaveAccounts(EmailBoxes.Select(eb => eb.Account).ToList());
                 }
 
-                SelectedEmailBox = emailBox;
+                // Сначала инициализируем ящик
                 await InitializeEmailBox(emailBox);
-                emailBox.IsInitialized = true; // Помечаем как инициализированный
+                emailBox.IsInitialized = true;
+
+                // Затем устанавливаем его как выбранный
+                SelectedEmailBox = emailBox;
                 IsConnected = true;
             }
             catch (Exception ex)

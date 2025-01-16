@@ -95,6 +95,15 @@ namespace EmailClient.Core.Services
                                     Icon = "📥"
                                 });
                             }
+                            else if (name.Equals("INBOX/ToMyself", StringComparison.OrdinalIgnoreCase))
+                            {
+                                folders.Add(new EmailFolder
+                                {
+                                    Name = "Письма себе",
+                                    Path = encodedName,
+                                    Icon = "👤"
+                                });
+                            }
                             else if (attributes.Contains("\\Sent") || name.Contains("Отправленные"))
                             {
                                 folders.Add(new EmailFolder
