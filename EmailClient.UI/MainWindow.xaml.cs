@@ -19,19 +19,15 @@ namespace EmailClient.UI
             Loaded += MainWindow_Loaded;
         }
 
+
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             try
             {
-                if (_viewModel.EmailBoxes.Count > 0)
-                {
-                    _viewModel.IsLoading = true;  // Показываем индикатор загрузки
-                    _viewModel.StatusMessage = "Initializing email client...";
+                _viewModel.IsLoading = true;
+                _viewModel.StatusMessage = "Initializing email client...";
 
-                    // Инициализируем только первый аккаунт
-                    var firstAccount = _viewModel.EmailBoxes.First().Account;
-                    await _viewModel.InitializeWithAccount(firstAccount);
-                }
+                await _viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {

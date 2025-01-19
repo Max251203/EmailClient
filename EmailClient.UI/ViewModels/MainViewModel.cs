@@ -40,17 +40,33 @@ namespace EmailClient.UI.ViewModels
             DeleteCommand = new RelayCommand(_ => DeleteSelectedEmailAsync(), _ => IsConnected && SelectedEmail != null);
             AddEmailBoxCommand = new RelayCommand(_ => AddNewEmailBox());
             RemoveEmailBoxCommand = new RelayCommand(box => RemoveEmailBox(box as EmailBox), _ => SelectedEmailBox != null);
+        }
 
-            // Загружаем сохраненные аккаунты
-            var accounts = _settingsService.LoadAccounts();
-            if (accounts.Any())
+        public async Task InitializeAsync()
+        {
+            try
             {
-                foreach (var account in accounts)
+                var accounts = _settingsService.LoadAccounts();
+                if (accounts.Any())
                 {
-                    var emailBox = new EmailBox(account);
-                    EmailBoxes.Add(emailBox);
+                    foreach (var account in accounts)
+                    {
+                        var emailBox = new EmailBox(account);
+                        EmailBoxes.Add(emailBox);
+                    }
+
+                    // Не устанавливаем SelectedEmailBox здесь
+                    await Task.Delay(500); // Даем время на инициализацию UI
+
+                    if (EmailBoxes.Any())
+                    {
+                        SelectedEmailBox = EmailBoxes.First();
+                    }
                 }
-                SelectedEmailBox = EmailBoxes.First();
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Failed to initialize: {ex.Message}";
             }
         }
 
