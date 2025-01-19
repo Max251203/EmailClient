@@ -172,49 +172,62 @@ namespace EmailClient.Core.Services
                 response = await ReadResponseAsync();
                 _tag++;
 
-                // Парсинг заголовков писем
-                var currentEmail = new Email();
+                Email? currentEmail = null;
+                bool isProcessingHeaders = false;
+
                 foreach (var line in response.Split('\n'))
                 {
-                    if (line.StartsWith("* "))
+                    if (line.StartsWith("* ") && line.Contains("FETCH"))
                     {
-                        if (!string.IsNullOrEmpty(currentEmail.MessageId))
+                        // Сохраняем предыдущее письмо, если оно есть и имеет MessageId
+                        if (currentEmail?.MessageId != null)
                         {
                             emails.Add(currentEmail);
-                            currentEmail = new Email();
                         }
 
-                        if (line.Contains("FETCH"))
+                        // Создаем новое письмо
+                        currentEmail = new Email();
+                        var parts = line.Split(' ');
+                        if (parts.Length > 1)
                         {
-                            var parts = line.Split(' ');
-                            if (parts.Length > 1)
-                            {
-                                currentEmail.MessageId = parts[1];
-                            }
+                            currentEmail.MessageId = parts[1];
                         }
+                        isProcessingHeaders = true;
+                        continue;
                     }
-                    else if (line.Contains("Subject:"))
+
+                    if (!isProcessingHeaders || currentEmail == null)
+                        continue;
+
+                    // Обработка заголовков
+                    if (line.StartsWith("Subject:", StringComparison.OrdinalIgnoreCase))
                     {
                         currentEmail.Subject = DecodeHeaderValue(line.Replace("Subject:", "").Trim());
                     }
-                    else if (line.Contains("From:"))
+                    else if (line.StartsWith("From:", StringComparison.OrdinalIgnoreCase))
                     {
                         currentEmail.From = DecodeHeaderValue(line.Replace("From:", "").Trim());
                     }
-                    else if (line.Contains("To:"))
+                    else if (line.StartsWith("To:", StringComparison.OrdinalIgnoreCase))
                     {
                         currentEmail.To = new List<string> { DecodeHeaderValue(line.Replace("To:", "").Trim()) };
                     }
-                    else if (line.Contains("Date:"))
+                    else if (line.StartsWith("Date:", StringComparison.OrdinalIgnoreCase))
                     {
                         if (DateTimeOffset.TryParse(line.Replace("Date:", "").Trim(), out DateTimeOffset dateOffset))
                         {
                             currentEmail.Date = dateOffset.LocalDateTime;
                         }
                     }
+                    else if (string.IsNullOrWhiteSpace(line) && currentEmail.MessageId != null)
+                    {
+                        // Если встретили пустую строку после обработки заголовков
+                        isProcessingHeaders = false;
+                    }
                 }
 
-                if (!string.IsNullOrEmpty(currentEmail.MessageId))
+                // Добавляем последнее письмо, если оно есть и имеет MessageId
+                if (currentEmail?.MessageId != null)
                 {
                     emails.Add(currentEmail);
                 }
