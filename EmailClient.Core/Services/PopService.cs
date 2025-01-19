@@ -128,6 +128,7 @@ namespace EmailClient.Core.Services
                 throw new Exception($"Failed to retrieve emails: {ex.Message}", ex);
             }
         }
+
         private async Task<Email> RetrieveEmailAsync(string messageNum)
         {
             await SendCommandAsync($"RETR {messageNum}");

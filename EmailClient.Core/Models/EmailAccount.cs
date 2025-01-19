@@ -4,7 +4,7 @@ public class EmailAccount
 {
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
-    public string ImapServer { get; set; } = string.Empty;  // Добавляем IMAP настройки
+    public string ImapServer { get; set; } = string.Empty; 
     public int ImapPort { get; set; }
     public string SmtpServer { get; set; } = string.Empty;
     public int SmtpPort { get; set; }

@@ -49,11 +49,11 @@ public static class EmailProviderSettings
             EmailProvider.GstuMail => new EmailServerSettings
             {
                 ImapServer = "mail.gstu.by",
-                ImapPort = 143,  // Меняем порт на 143 (стандартный порт IMAP без SSL)
+                ImapPort = 143,  
                 SmtpServer = "mail.gstu.by",
                 SmtpPort = 587,
-                RequiresSsl = false,  // Отключаем SSL для начального подключения
-                RequiresExplicitSsl = true,  // Оставляем STARTTLS
+                RequiresSsl = false,  
+                RequiresExplicitSsl = true,
                 DisplayName = "GSTU Mail",
                 Protocol = EmailProtocol.IMAP
             },
