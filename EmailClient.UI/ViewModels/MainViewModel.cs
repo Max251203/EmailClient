@@ -25,6 +25,7 @@ namespace EmailClient.UI.ViewModels
         private string _statusMessage = string.Empty;
         private bool _isConnected;
         private CancellationTokenSource? _loadingCts;
+        private readonly SemaphoreSlim _emailLoadingSemaphore = new SemaphoreSlim(1, 1);
 
         public MainViewModel()
         {
@@ -40,6 +41,12 @@ namespace EmailClient.UI.ViewModels
             DeleteCommand = new RelayCommand(_ => DeleteSelectedEmailAsync(), _ => IsConnected && SelectedEmail != null);
             AddEmailBoxCommand = new RelayCommand(_ => AddNewEmailBox());
             RemoveEmailBoxCommand = new RelayCommand(box => RemoveEmailBox(box as EmailBox), _ => SelectedEmailBox != null);
+
+            // Добавьте очистку при выгрузке
+            Application.Current.Exit += (s, e) =>
+            {
+                _emailLoadingSemaphore?.Dispose();
+            };
         }
 
         public async Task InitializeAsync()
@@ -524,12 +531,24 @@ namespace EmailClient.UI.ViewModels
         {
             if (email == null || SelectedEmailBox == null) return;
 
+            // Отменяем предыдущую загрузку
+            _loadingCts?.Cancel();
+            _loadingCts = new CancellationTokenSource();
+
             try
             {
                 IsContentLoading = true;
 
-                await Task.Run(async () =>
+                // Ждем освобождения семафора с таймаутом
+                if (!await _emailLoadingSemaphore.WaitAsync(TimeSpan.FromSeconds(5), _loadingCts.Token))
                 {
+                    return;
+                }
+
+                try
+                {
+                    await Task.Delay(100, _loadingCts.Token); // Небольшая задержка для стабильности
+
                     await _imapService.ConnectAsync(
                         SelectedEmailBox.Account.ImapServer,
                         SelectedEmailBox.Account.ImapPort,
@@ -541,25 +560,36 @@ namespace EmailClient.UI.ViewModels
 
                     var fullEmail = await _imapService.GetEmailContentAsync(email.MessageId);
 
-                    Application.Current.Dispatcher.Invoke(() =>
+                    if (!_loadingCts.Token.IsCancellationRequested)
                     {
-                        email.Body = fullEmail.Body;
-                        email.HtmlBody = fullEmail.HtmlBody;
-                        email.Attachments = fullEmail.Attachments;
-                        OnPropertyChanged(nameof(SelectedEmail));
-                    });
-
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            email.Body = fullEmail.Body;
+                            email.HtmlBody = fullEmail.HtmlBody;
+                            email.Attachments = fullEmail.Attachments;
+                            OnPropertyChanged(nameof(SelectedEmail));
+                        });
+                    }
+                }
+                finally
+                {
                     await _imapService.DisconnectAsync();
-                });
+                    _emailLoadingSemaphore.Release();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Операция была отменена, игнорируем
             }
             catch (Exception ex)
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                if (!_loadingCts.Token.IsCancellationRequested)
                 {
-                    StatusMessage = $"Error loading email content: {ex.Message}";
-                    MessageBox.Show($"Failed to load email content: {ex.Message}",
-                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                });
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        StatusMessage = $"Error loading email content: {ex.Message}";
+                    });
+                }
             }
             finally
             {
